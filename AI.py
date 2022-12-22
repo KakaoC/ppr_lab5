@@ -131,6 +131,46 @@ def main():
         print('Epoch : {}, val accuracy : {}, val loss : {}'.format(
             epoch + 1, epoch_val_accuracy, epoch_val_loss))
 
+    plt.figure(1,figsize=(15, 5))
+    plt.title('Train accuracy')
+    plt.plot(range(len(accuracy_values)), accuracy_values, color="green")
+    plt.legend(["Accuracy"])
+    
+    plt.figure(2,figsize=(15, 5))
+    plt.title('Train loss')
+    plt.plot(range(len(accuracy_values)), [float(value.detach())
+             for value in loss_values], color="blue")
+    plt.legend(["Loss"])
+    
+    plt.figure(3,figsize=(15, 5))
+    plt.title('valid accuracy')
+    plt.plot(range(len(accuracy_val_values)),
+             accuracy_val_values, color="green")
+    plt.legend(["Accuracy"])
+    
+    plt.figure(4,figsize=(15, 5))
+    plt.title('valid loss')
+    plt.plot(range(len(accuracy_val_values)), [float(value.detach())
+             for value in loss_val_values], color="blue")
+    plt.legend(["Loss"])
+    plt.show()
+    
+    model.eval()
+    test_loss = 0
+    test_accuracy = 0
+
+    for data, label in test_dataloader:
+        data = data.to(device)
+        label = label.to(device)
+
+        output = model(data)
+
+        acc = np.array(([1 if (1 if output[j][0].detach() >= 0.5 else 0) == int(
+            label[j]) else 0 for j in range(label.shape[0])])).mean()
+        test_accuracy += acc / len(test_dataloader)
+        test_loss += float(loss.detach()) / len(test_dataloader)
+    print('test_accuracy=', test_accuracy, ' ', 'test_loss=', test_loss)
+    print('end')
     
 if __name__ == "__main__":
     main()
