@@ -80,7 +80,7 @@ def main():
     val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
     optimizer = optim.Adam(params=model.parameters(), lr=0.001)
     criterion = nn.BCELoss()
-    epochs = 9
+    epochs = 15
     accuracy_values = []
     loss_values = []
     accuracy_val_values = []
