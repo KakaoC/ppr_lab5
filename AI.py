@@ -62,3 +62,20 @@ class CNN(nn.Module):
         output = torch.nn.Sigmoid()(self.fc_2(output))
         return output
 
+def main():
+    device = torch.device(
+        "cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    model = CNN().to(device)
+    torch.cuda.is_available()
+    custom_transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
+                                                        torchvision.transforms.Resize(
+                                                            (224, 224)),
+                                                        torchvision.transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+    train_dataset = CustomImageDataset(
+        'annotation_train.csv', custom_transforms)
+    test_dataset = CustomImageDataset('annotation_test.csv', custom_transforms)
+    val_dataset = CustomImageDataset('annotation_val.csv', custom_transforms)
+    train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+    val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
+    
