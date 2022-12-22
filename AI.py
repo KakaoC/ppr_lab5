@@ -78,4 +78,59 @@ def main():
     train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=4, shuffle=False)
     val_dataloader = DataLoader(val_dataset, batch_size=4, shuffle=False)
+    optimizer = optim.Adam(params=model.parameters(), lr=0.001)
+    criterion = nn.BCELoss()
+    epochs = 9
+    accuracy_values = []
+    loss_values = []
+    accuracy_val_values = []
+    loss_val_values = []
+    for epoch in range(epochs):
+        model.train()
+        epoch_loss = 0
+        epoch_accuracy = 0
+        epoch_val_accuracy = 0
+        epoch_val_loss = 0
+
+        for data, label in train_dataloader:
+            data = data.to(device)
+            label = label.to(device)
+
+            output = model(data)
+            loss = criterion(output, label.unsqueeze(dim=1).to(torch.float))
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            acc = np.array(([1 if (1 if output[j][0].detach() >= 0.5 else 0) == int(
+                label[j]) else 0 for j in range(label.shape[0])])).mean()
+            epoch_accuracy += acc / len(train_dataloader)
+            epoch_loss += loss / len(train_dataloader)
+
+        accuracy_values.append(epoch_accuracy)
+        loss_values.append(epoch_loss)
+        print('Epoch : {}, train accuracy : {}, train loss : {}'.format(
+            epoch + 1, epoch_accuracy, epoch_loss))
+
+
+        model.eval()
+        for data, label in val_dataloader:
+            data = data.to(device)
+            label = label.to(device)
+
+            output = model(data)
+            loss_val = criterion(output, label.unsqueeze(dim=1).to(torch.float))
+            acc_val = np.array(([1 if (1 if output[j][0].detach() >= 0.5 else 0) == int(
+                label[j]) else 0 for j in range(label.shape[0])])).mean()
+            epoch_val_accuracy += acc_val / len(val_dataloader)
+            epoch_val_loss += loss_val / len(val_dataloader)
+
+        accuracy_val_values.append(epoch_val_accuracy)
+        loss_val_values.append(epoch_val_loss)
+
+        print('Epoch : {}, val accuracy : {}, val loss : {}'.format(
+            epoch + 1, epoch_val_accuracy, epoch_val_loss))
+
     
+if __name__ == "__main__":
+    main()
